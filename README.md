@@ -7,12 +7,13 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 
 ## インストール
 
-    % git clone https://github.com/######
-    % npm install
+	% https://github.com/SecureSkyTechnology/BadLibrary
+    % cd BadLibrary/src
+	% npm install
 
 ## 起動
 
-単純に app.js を起動するだけです。デフォルトでは8080でlistenします。
+単純に src/app.js を起動するだけです。デフォルトでは8080でlistenします。
 
     % npm start 
 
