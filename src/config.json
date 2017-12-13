@@ -1,6 +1,6 @@
 {
     "global" : {
-        "basic" : "azarashi:azara4"
+        "basic" : "user:pass"
     },
     "vulnerabilities" : {
         "sqli" : ["auth", "search", "blind"],
