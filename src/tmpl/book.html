@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 書籍情報 <@ title @></title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+.login{
+	display:<@ login @>;
+}
+.logout{
+	display:<@ logout @>;
+}
+
+</style>
+<script src="/static/lib.js"></script>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 書籍情報</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item login">[ <a href="./logout" id="logout">ログアウト</a> ]</span>
+	<span class="header-item logout">[ ログアウト ]</span>
+</div>
+<div style="padding: 2em;border-top:solid 1px silver">
+	<div>
+		<table>
+			<tr><td>書籍名</td><td><@ title @></td></tr>
+			<tr><td>コード</td><td><@ id @></td></tr>
+			<tr><td>入荷日</td><td><@ date @></td></tr>
+			<tr><td>ページ数</td><td><@ pages @></td></tr>
+			<tr><td>書架</td><td><@ loc @></td></tr>
+			<tr><td>&nbsp;</td></tr>
+			<tr><td>過去の貸し出し</td><td><@ past @></td></tr>
+		</table>
+	</div>
+</div>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

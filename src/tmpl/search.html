@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 書籍情報 <@ title @></title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+.login{
+	display:<@ login @>;
+}
+.logout{
+	display:<@ logout @>;
+}
+
+</style>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 書籍情報</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item login">[ <a href="./logout">ログアウト</a> ]</span>
+	<span class="header-item logout">[ ログアウト ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+		<span class="login">ようこそ、<@ user @>さん。</span>
+		書籍を検索できます。
+	</div>
+	<form method="GET" style="margin-top:0.5em">
+	<label for="q">検索語句</label>
+	<input type="text" name="q" id="q" value="<@ q @>">
+	<input type="submit" value=" 検索 ">
+	</form>
+</div>
+<div style="padding: 2em;border-top:solid 1px silver">
+
+	<table style="background-color:silver;margin-top:0.5em;<@ display @>">
+	<tbody style="background-color:white">
+		<tr><th>書籍名</th><th>書架</th></tr>
+	<@ raw:table @>
+	</tbody>
+	</table>
+	<div style="<@ notfound @>">見つかりませんでした。</div>
+</div>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

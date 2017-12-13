@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 管理画面</title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+.errormsg{
+	margin: 0.5em;
+	padding: 0.5em;
+	border-radius: 0.3em;
+	border: solid 1px #f99;
+	display: none;
+}
+.login{
+	display:<@ login @>;
+}
+.logout{
+	display:<@ logout @>;
+}
+</style>
+<script>
+"use strict";
+var count;
+function htmlEscape( s ) {
+    s = s + "";
+    return s.replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" ).replace( /"/g, "&quot;" ).replace( /'/g, "&#x27;" );
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+	let now = new Date();
+	document.getElementById("status").style.display = "none";
+	document.getElementById("reboot").addEventListener("click", function(evt) {
+		var xhr;
+		count = 0;
+		timer();
+		document.getElementById("status").style.display = "block";
+		evt.preventDefault();
+		xhr = new XMLHttpRequest();
+
+		xhr.open("POST", "/admin/reboot", true);
+		xhr.onreadystatechange = function () {
+			var success = false;
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200 && xhr.responseBody.substr(0,2) === "ok") {
+					success = true;
+				}
+				if (success) {
+					alert( "再起動しました");
+				} else {
+					alert( "再起動に失敗しました");
+				}
+				document.getElementById("status").style.display = "none";
+			}
+		};
+		xhr.send(null);
+	}, false);
+	document.getElementById("book-date").value = now.getFullYear() + "-" + (now.getMonth() +1) + "-" + now.getDate();
+
+	document.getElementById("book-add").addEventListener("submit", function (evt) {
+		var title, date, pages, loc;
+		title = document.getElementById("book-title").value;
+		date  = document.getElementById("book-date").value;
+		pages = document.getElementById("book-pages").value | 0;
+		loc   = document.getElementById("book-loc").value;
+		var xhr = new XMLHttpRequest();
+
+		var xml = "<book><title>" + title + "</title><date>" + date + "</date><pages>" + pages + "</pages><loc>" + loc + "</loc></book>";
+
+		xhr.open("POST", "/admin/add-book", true);
+		xhr.setRequestHeader("content-type", "text/plain");
+		xhr.onreadystatechange = function () {
+			var success = false;
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					var r = xhr.responseXML && xhr.responseXML.getElementsByTagName("result");
+					if (r && r.length > 0 && r[0].textContent === "ok") {
+						success = true;
+					}
+				}
+				if (success) {
+					alert("登録しました。");
+				} else {
+					alert("登録に失敗しました。");
+				}
+			}
+		}
+		xhr.send(xml);
+		evt.preventDefault();
+	}, false);
+}, false);
+
+function timer() {
+	var s = "";
+	for (var i = 0; i < count; i++) {
+		s += ".";
+	}
+	count = (count + 1) % 3;
+	document.getElementById("status").textContent = "再起動中です" + s;
+	setTimeout(timer, 500);
+}
+
+</script>
+<script src="/static/lib.js"></script>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 管理画面</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item login">[ <a id="logout" href="./logout">ログアウト</a> ]</span>
+	<span class="header-item logout">[ ログアウト ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+		<h2>サーバーの再起動</h2>
+		<button id="reboot">サーバーの再起動</button>
+		<div id="status">..
+		</div>
+	</div>
+
+	<div>
+		<h2>書籍の登録</h2>
+		<table>
+			<form id="book-add" method="POST" >
+			<tr>
+				<td><label for="book-title">書籍名</label></td>
+				<td><input type="text" id="book-title" size="60" required></td>
+			</tr>
+			<tr>
+				<td><label for="book-date">入荷日</label></td>
+				<td><input type="text" id="book-date" size="20" required ></td>
+			</tr>
+			<tr>
+				<td><label for="book-pages">ページ数</label></td>
+				<td><input type="text" id="book-pages" size="20" required pattern="^[0-9]+$"></td>
+			</tr>
+			<tr>
+				<td><label for="book-loc">書架</label></td>
+				<td><input type="text" id="book-loc" size="20" required value="Z-1" pattern="^[A-Z]{1,2}-[\d]{1,3}$"></td>
+			</tr>
+			<tr>
+				<td></td><td><input type="submit" value=" 登録 "></td>
+			</tr>
+	   </form>
+		</table>
+	</div>
+</div>
+<hr>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

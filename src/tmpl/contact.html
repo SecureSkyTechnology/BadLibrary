@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 お問合せ</title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+</style>
+<script src="/static/lib.js"></script>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 お問合せ</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item">[ <a id="logout" href="./logout">ログアウト</a> ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+	ようこそ、<@ user @>さん。図書館へのお問合せがありましたら、下記フォームから入力をお願いします。
+	</div>
+	<form method="POST" style="margin-top:0.5em" enctype="application/x-www-form-urlencoded">
+	<label for="name">お名前:</label>
+	<input type="text" readonly id="name" value="<@ user @>" style="background-color:silver">さん
+	<br>
+	<label for="text">お問い合わせ内容:</label><br>
+	<textarea name="text" id="text" style="width:50em;height:5em" autofocus></textarea>
+	<br>
+	<input type="submit" value=" 送信 ">
+	</form>
+</div>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

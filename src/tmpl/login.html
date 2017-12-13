@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 ログイン</title>
+<!--
+	TODO: リリースまでに管理画面にきちんと認証をつける (担当：上野)
+-->
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+.errormsg{
+	margin: 0.5em;
+	padding: 0.5em;
+	border-radius: 0.3em;
+	border: solid 1px #f99;
+	display: none;
+}
+</style>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 ログイン</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item">[ ログアウト ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+	ようこそ、Bad図書館へ。
+	</div>
+	<div>
+		<div style="margin: 1em 2em 1em 0em; border: solid 2px red; padding: 0.5em; background-color:#fcc; font-size:80%;display:none">
+			メールアドレス <code>akita@example.jp</code> 、暗証番号 <code>1234</code> でログイン可能です。それ以外の認証情報を知っている場合、それらでログインしても構いません。
+		</div>
+		<form method="POST" style="margin:0.5em" enctype="application/x-www-form-urlencoded" action="./login">
+			<label for="mail">メールアドレス: </label><br>
+			<input type="email" id="mail" name="mail" size="40" autofocus value="<@ mail @>"><br>
+			<label for="pass">暗証番号(4桁): </label><br>
+			<input type="password" id="pass" name="pass" size="40" maxlength="40" value="<@ pass @>"><br>
+			<!--
+			<input type="text" id="pass" name="pass" size="40" maxlength="40" value="<@ pass @>"><br>
+			-->
+			<br>
+			<input type="submit" value=" ログイン ">
+		</form>
+		<div class="errormsg" style="<@ errormsg @>">メールアドレス、暗証番号を正しく入力して下さい</div>
+	</div>
+</div>
+<hr>
+<div style="padding: 1em 2em 1em 2em">
+当サイトでは利用者の皆様の情報を保護するため、SSL/TLSを用いて通信の暗号化を行っています。
+</div>
+<@ notice @>
+</body>
+</html>

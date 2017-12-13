@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 貸し出し履歴</title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+</style>
+<script src="/static/lib.js"></script>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 貸し出し履歴</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item">[ <a id="logout" href="./logout">ログアウト</a> ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+	ようこそ、<@ user @>さん。過去の書籍貸し出し履歴を検索できます。
+	</div>
+	<form method="GET" style="margin-top:0.5em">
+	<label for="q">検索語句</label>
+	<input type="text" name="q" id="q" value="<@ q @>">
+	<label for="d">貸し出し年月</label>
+	<select name="d" id="d">
+		<option value="">(すべて)</option>
+		<option value="201501" <@ selected201501 @> >2015-01</option>
+		<option value="201502" <@ selected201502 @> >2015-02</option>
+		<option value="201503" <@ selected201503 @> >2015-03</option>
+		<option value="201504" <@ selected201504 @> >2015-04</option>
+		<option value="201505" <@ selected201505 @> >2015-05</option>
+		<option value="201506" <@ selected201506 @> >2015-06</option>
+		<option value="201507" <@ selected201507 @> >2015-07</option>
+		<option value="201508" <@ selected201508 @> >2015-08</option>
+		<option value="201509" <@ selected201509 @> >2015-09</option>
+		<option value="201510" <@ selected201510 @> >2015-10</option>
+		<option value="201511" <@ selected201511 @> >2015-11</option>
+		<option value="201512" <@ selected201512 @> >2015-12</option>
+		<option value="201601" <@ selected201601 @> >2016-01</option>
+		<option value="201602" <@ selected201602 @> >2016-02</option>
+		<option value="201603" <@ selected201603 @> >2016-03</option>
+		<option value="201604" <@ selected201604 @> >2016-04</option>
+		<option value="201605" <@ selected201605 @> >2016-05</option>
+		<option value="201606" <@ selected201606 @> >2016-06</option>
+		<option value="201607" <@ selected201607 @> >2016-07</option>
+		<option value="201608" <@ selected201608 @> >2016-08</option>
+		<option value="201609" <@ selected201609 @> >2016-09</option>
+		<option value="201610" <@ selected201610 @> >2016-10</option>
+		<option value="201611" <@ selected201611 @> >2016-11</option>
+		<option value="201612" <@ selected201612 @> >2016-12</option>
+		<option value="201701" <@ selected201701 @> >2017-01</option>
+		<option value="201702" <@ selected201702 @> >2017-02</option>
+		<option value="201703" <@ selected201703 @> >2017-03</option>
+		<option value="201704" <@ selected201704 @> >2017-04</option>
+		<option value="201705" <@ selected201705 @> >2017-05</option>
+		<option value="201706" <@ selected201706 @> >2017-06</option>
+		<option value="201707" <@ selected201707 @> >2017-07</option>
+		<option value="201708" <@ selected201708 @> >2017-08</option>
+		<option value="201709" <@ selected201709 @> >2017-09</option>
+	</select>
+	<input type="submit" value=" 検索 ">
+
+	</form>
+</div>
+<div style="padding: 2em;border-top:solid 1px silver">
+
+<div>
+<@ raw:range @>の貸し出し履歴から「<@ q @>」を含むものを検索しました。
+</div>
+
+<table style="background-color:silver;margin-top:0.5em">
+	<tbody style="background-color:white">
+	<tr><th>書籍名</th><th>コード</th><th>利用者名</th><th>貸し出し日</th><th>返却日</th></tr>
+<@ raw:table @>
+	</tbody>
+</table>
+</div>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

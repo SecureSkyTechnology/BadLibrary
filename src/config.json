@@ -1,0 +1,14 @@
+{
+    "global" : {
+        "basic" : "azarashi:azara4"
+    },
+    "vulnerabilities" : {
+        "sqli" : ["auth", "search", "blind"],
+        "xss" : ["reflect", "stored", "dom" ],
+        "session" : [ "no-refresh", "no-httponly", "serial" ],
+        "xxe" : false,
+        "csrf" : true,
+        "expose" : ["dirindex", "admin", "contact"]
+    }
+}
+

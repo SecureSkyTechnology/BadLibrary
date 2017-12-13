@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>404 Not Found</title>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+	var elm;
+	elm = document.createElement("a");
+	elm.setAttribute(href, "location.href");
+	elm.appendChild(document.createTextNode(location.href));
+	document.getElementById("url").appendChild(elm);
+}, false);
+</script>
+</head>
+<body>
+	<h1>404 Not Found</h1>
+	<hr>
+	Requested URL <span id="url"></span> was not found on this server.
+		<hr>
+		<img src="404.jpg">
+<@ notice @>
+</body>
+</html>
+

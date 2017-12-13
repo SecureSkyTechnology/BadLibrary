@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Bad図書館 お問合せ</title>
+<style>
+html{
+	margin: 0px;
+	padding 0px;
+	background-color:white;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	background-color:white;
+}
+td{
+	background-color:white;
+	padding: 0.2em 2em 0.2em 2em;
+}
+span.header-item{
+	margin-right: 1em;
+}
+</style>
+<script src="/static/lib.js"></script>
+</head>
+<body>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
+	<h1>Bad図書館 お問合せ</h1>
+</div>
+<div style="background-color:silver;padding:0.5em 2em 0.5em 2em;border-top:solid 1px white">
+	<span class="header-item">[ <a href="./">TOP</a> ]</span>
+	<span class="header-item">[ <a href="./search">書籍検索</a> ]</span>
+	<span class="header-item">[ <a href="./history">貸し出し履歴</a> ]</span>
+	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
+	<span class="header-item">[ <a id="logout" href="./logout">ログアウト</a> ]</span>
+</div>
+<div style="padding: 1em 2em 1em 2em">
+	<div>
+	ようこそ、<@ user @>さん。
+	</div>
+	<div>
+		<br>
+		以下の内容で送信しました。お問合せありがとうございました。
+		<br>
+		内容を確認の上、追って連絡させて頂きます。
+		<br>
+	</div>
+	<div style="border: solid 1px silver; padding: 0.2em;margin-top: 0.2em;margin-bottom:0.2em">
+		お名前: <@ user @> さん<br>
+		日時: <@ time @><br>
+		お問合せ内容:
+		<@ text @>
+	</div>
+</div>
+<div style="display:none">
+<form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
+	<@ raw:csrf @>
+</form>
+</div>
+<@ notice @>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "badlibrary",
+  "version": "1.0.0",
+  "description": "badlibrary is a vulnerable application for pentesting",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "install": "node preset.js",
+    "lint": "eslint *.js"
+  },
+  "author": "Yosuke HASEGAWA",
+  "license": "MIT",
+  "dependencies": {
+    "libxmljs": "^0.18.7",
+    "sqlite3": "^3.1.8"
+  }
+}
