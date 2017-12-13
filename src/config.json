@@ -6,7 +6,7 @@
         "sqli" : ["auth", "search", "blind"],
         "xss" : ["reflect", "stored", "dom" ],
         "session" : [ "no-refresh", "no-httponly", "serial" ],
-        "xxe" : false,
+        "xxe" : true,
         "csrf" : true,
         "expose" : ["dirindex", "admin", "contact"]
     }
