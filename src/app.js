@@ -92,7 +92,6 @@ function init (configFile) {
     book: 'book.html',
     search: 'search.html',
     bookRow: 'book-row.html',
-    wana: 'wana.html',
     robots: 'robots.txt',
     '500': '500.html',
     '404': '404.html'
@@ -521,14 +520,6 @@ let handlers = [
         return conn.res.end(waf.render(template, {msg: 'invalid parameter', book: ''}))
       }
       return conn.res.end(waf.render(template, {msg: 'internal error', book: doc.root().toString()}))
-    }
-  },
-  {
-    pattern: '/wana.html',
-    method: 'get',
-    callback: (conn) => {
-      conn.res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
-      conn.res.end(waf.render(templates.wana, {}))
     }
   },
   {
