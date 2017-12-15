@@ -218,7 +218,12 @@ function SessionManager () {
   }
 
   return function (sessionId, res) {
-    let sessionObj = _sessions[ sessionId ] || newSessionObj(config.sessionIdGenerator(), res)
+    let sessionObj
+    if (_sessions.hasOwnProperty(sessionId)) {
+      sessionObj = _sessions[ sessionId ]
+    } else {
+      sessionObj = newSessionObj(config.sessionIdGenerator(), res)
+    }
     sessionObj.res = res
     return sessionObj
   }
