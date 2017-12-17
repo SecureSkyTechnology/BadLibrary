@@ -131,6 +131,11 @@ http.ServerResponse.prototype.respondDirIndex = function (dirname) {
     let n = filenames.length
     let files = {}
     let dirs = {}
+    if (n === 0) {
+      this.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+      this.end(render(template, { text: text }))
+      return;
+    }
     filenames.forEach(filename => {
       fs.lstat(`${dirname}/${filename}`, (err, stats) => {
         n--
