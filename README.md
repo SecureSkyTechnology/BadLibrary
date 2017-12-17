@@ -42,15 +42,15 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 
     {
         "global" : {
-            "basic" : "azarashi:azara4" // BASIC認証のユーザー名とパスワード
+            "basic" : "user:1234" // BASIC認証のユーザー名とパスワード
         },
         "vulnerabilities" : {
             "sqli" : ["auth", "search", "blind"],          // SQLインジェクション 
             "xss" : ["reflect", "dom" ],                   // XSS
             "session" : [ "no-refresh", "no-httponly", "serial" ], //セッション情報の不備
+            "expose" : ["contaft", "dirindex", "admin"],   // 情報の露出
             "xxe" : true,                                  // XXE
-            "csrf" : true,                                 // CSRF
-            "expose" : ["dirindex", "admin", "contact"]    // 情報の露出
+            "csrf" : true                                  // CSRF
         }
     }
 
@@ -63,11 +63,11 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 - `vulnerabilities.session` の要素に `"no-refresh"` を指定すると、ログイン後もセッションIDが変更されなくなります。
 - `vulnerabilities.session` の要素に `"no-httponly"` を指定すると、セッションIDにhttponly属性が付与されなくなります。
 - `vulnerabilities.session` の要素に `"serial"` を指定すると、セッションIDがハッシュ値ではなく連番で発行されるようになります。
-- `vulnerabilities.xxe` に `true` を指定すると、管理画面での書籍登録でXXEが有効になります。`vulnerabilities.expose = ["admin"]` も同時に指定する必要があります。
-- `vulnerabilities.csrf` に `true` を指定すると、お問い合わせ画面等でCSRFが有効になります。
+- `vulnerabilities.expose` の要素に `"contact"` を指定すると、お問い合わせの内容のログが閲覧可能になります。(このオプションが指定されない場合はお問い合わせ内容は一切記録されません。)
 - `vulnerabilities.expose` の要素に `"dirindex"` を指定すると、お問い合わせログのディレクトリインデックスが有効になります。`vulnerabilities.expose = ["contact"]` も同時に指定する必要があります。
 - `vulnerabilities.expose` の要素に `"admin"` を指定すると、誰でもログイン無しに管理画面にアクセス可能になります。
-- `vulnerabilities.expose` の要素に `"contact"` を指定すると、お問い合わせの内容のログが閲覧可能になります。このオプションが指定されない場合はお問い合わせ内容は一切記録されません。
+- `vulnerabilities.xxe` に `true` を指定すると、管理画面での書籍登録でXXEが有効になります。`vulnerabilities.expose = ["admin"]` も同時に指定する必要があります。
+- `vulnerabilities.csrf` に `true` を指定すると、お問い合わせ画面等でCSRFが有効になります。
 
 ## 安全性
 
