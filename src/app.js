@@ -16,6 +16,25 @@ function toJSTDateString (d) {
   return `${s4(d.getUTCFullYear())}/${s2(1 + d.getUTCMonth())}/${s2(d.getUTCDate())} ${s2(d.getUTCHours())}:${s2(d.getUTCMinutes())}:${s2(d.getUTCSeconds())}`
 }
 
+// https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+if (!String.prototype.padStart) {
+    String.prototype.padStart = function padStart(targetLength,padString) {
+        targetLength = targetLength>>0; //truncate if number or convert non-number to 0;
+        padString = String((typeof padString !== 'undefined' ? padString : ' '));
+        if (this.length > targetLength) {
+            return String(this);
+        }
+        else {
+            targetLength = targetLength-this.length;
+            if (targetLength > padString.length) {
+                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
+            }
+            return padString.slice(0,targetLength) + String(this);
+        }
+    };
+}
+
 let counter = (function (initial) {
   let val = initial
   return function () {
