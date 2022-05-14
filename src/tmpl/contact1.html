@@ -6,7 +6,7 @@
 <style>
 html{
 	margin: 0px;
-	padding 0px;
+	padding: 0px;
 	background-color:white;
 }
 body{
@@ -44,12 +44,12 @@ span.header-item{
 	</div>
 	<form method="POST" style="margin-top:0.5em" enctype="application/x-www-form-urlencoded">
 	<div style="border: solid 1px silver; padding: 0.2em;margin-top: 0.2em;margin-bottom:0.2em">
-		お名前: <@ user @> さん<br>
+		お名前: <@ username @> さん<br>
 		日時: <@ time @><br>
 		お問合せ内容:
 		<@ text @>
 	</div>
-	<input type="hidden" name="text" value="<@ text @>">
+	<@ raw:hidden @>
 	<input type="hidden" name="send" value="1">
 	<input type="submit" value=" 送信 ">
 	</form>

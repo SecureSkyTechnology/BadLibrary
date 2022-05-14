@@ -6,9 +6,10 @@
         "sqli" : ["auth", "search", "blind"],
         "xss" : ["reflect", "stored", "dom" ],
         "session" : [ "no-refresh", "no-httponly", "serial" ],
-        "xxe" : true,
+        "xxe" : false,
         "csrf" : true,
-        "expose" : ["dirindex", "admin", "contact"]
+        "expose" : ["dirindex", "admin", "contact"],
+        "racecondition": false
     }
 }
 

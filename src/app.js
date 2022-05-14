@@ -7,6 +7,11 @@ const libxmljs = require('libxmljs')
 const path = require('path')
 
 let db, templates, config, wafConfig
+const contactBuffer = {
+  username: '',
+  time: '',
+  text: ''
+}
 
 function toJSTDateString (d) {
   if (d === undefined) d = new Date()
@@ -281,13 +286,18 @@ const handlers = [
       const user = conn.session.get('user')
       const uid = conn.session.get('id')
       let html
-      const htmlParams = {
-        user,
-        time: toJSTDateString(d)
-      }
       if (user === undefined) return conn.res.redirect('./')
-      htmlParams.text = conn.body.text
       if (conn.body.send === '1') {
+        const htmlParams = { user }
+        if (config.vulnerabilities.racecondition) {
+          htmlParams.username = contactBuffer.username
+          htmlParams.time = contactBuffer.time
+          htmlParams.text = contactBuffer.text
+        } else {
+          htmlParams.username = user
+          htmlParams.time = conn.body.time || ''
+          htmlParams.text = conn.body.text || ''
+        }
         html = waf.render(templates.contact2, htmlParams)
         {
           const date =
@@ -318,6 +328,20 @@ const handlers = [
         }
       } else {
         conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+        const htmlParams = {
+          user,
+          username: user,
+          time: toJSTDateString(d),
+          text: conn.body.text
+        }
+        if (config.vulnerabilities.racecondition) {
+          contactBuffer.username = user
+          contactBuffer.time = toJSTDateString(d)
+          contactBuffer.text = conn.body.text
+        } else {
+          const hiddenHtml = '<input type="hidden" name="text" value="<@ text @>"><input type="hidden" name="time" value="<@ time @>">'
+          htmlParams.hidden = waf.render(hiddenHtml, htmlParams)
+        }
         html = waf.render(templates.contact1, htmlParams)
         conn.res.end(html)
       }

@@ -50,7 +50,8 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
             "session" : [ "no-refresh", "no-httponly", "serial" ], //セッション情報の不備
             "expose" : ["contaft", "dirindex", "admin"],   // 情報の露出
             "xxe" : true,                                  // XXE
-            "csrf" : true                                  // CSRF
+            "csrf" : true,                                 // CSRF
+            "racecondition" : true                         // レースコンディション
         }
     }
 
@@ -68,6 +69,7 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 - `vulnerabilities.expose` の要素に `"admin"` を指定すると、誰でもログイン無しに管理画面にアクセス可能になります。
 - `vulnerabilities.xxe` に `true` を指定すると、管理画面での書籍登録でXXEが有効になります。`vulnerabilities.expose = ["admin"]` も同時に指定する必要があります。
 - `vulnerabilities.csrf` に `true` を指定すると、お問い合わせ画面等でCSRFが有効になります。
+- `vulnerabilities.racecondition` に `true` を指定すると、お問い合わせ画面でレースコンディションが有効になります。
 
 ## 安全性
 
