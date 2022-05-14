@@ -2,59 +2,21 @@
 
 const fs = require('fs')
 const waf = require('./waf.js')
-const qs = require('querystring')
 const sqlite3 = require('sqlite3')
 const libxmljs = require('libxmljs')
+const path = require('path')
 
 let db, templates, config, wafConfig
 
 function toJSTDateString (d) {
   if (d === undefined) d = new Date()
   d = new Date(d.getTime() + 9 * 60 * 60 * 1000)
-  let s4 = function (n) { return /([\d]{4})$/.exec('000' + n)[ 1 ] }
-  let s2 = function (n) { return /([\d]{2})$/.exec('0' + n)[ 1 ] }
+  const s4 = function (n) { return /([\d]{4})$/.exec('000' + n)[1] }
+  const s2 = function (n) { return /([\d]{2})$/.exec('0' + n)[1] }
   return `${s4(d.getUTCFullYear())}/${s2(1 + d.getUTCMonth())}/${s2(d.getUTCDate())} ${s2(d.getUTCHours())}:${s2(d.getUTCMinutes())}:${s2(d.getUTCSeconds())}`
 }
 
-// https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
-if (!String.prototype.padStart) {
-    String.prototype.padStart = function padStart(targetLength,padString) {
-        targetLength = targetLength>>0; //truncate if number or convert non-number to 0;
-        padString = String((typeof padString !== 'undefined' ? padString : ' '));
-        if (this.length > targetLength) {
-            return String(this);
-        }
-        else {
-            targetLength = targetLength-this.length;
-            if (targetLength > padString.length) {
-                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
-            }
-            return padString.slice(0,targetLength) + String(this);
-        }
-    };
-}
-
-// https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd
-if (!String.prototype.padEnd) {
-    String.prototype.padEnd = function padEnd(targetLength,padString) {
-        targetLength = targetLength>>0; //floor if number or convert non-number to 0;
-        padString = String((typeof padString !== 'undefined' ? padString : ' '));
-        if (this.length > targetLength) {
-            return String(this);
-        }
-        else {
-            targetLength = targetLength-this.length;
-            if (targetLength > padString.length) {
-                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
-            }
-            return String(this) + padString.slice(0,targetLength);
-        }
-    };
-}
-
-let counter = (function (initial) {
+const counter = (function (initial) {
   let val = initial
   return function () {
     return val++
@@ -91,7 +53,7 @@ function init (configFile) {
     session: true,
     xfo: true,
     xcto: true,
-    staticFiles: [ '/static/' ],
+    staticFiles: ['/static/'],
     protectCsrf: true,
     defaultHeaders: {}
   }
@@ -111,7 +73,7 @@ function init (configFile) {
   }
 
   sqlite3.verbose()
-  db = new sqlite3.Database(`${__dirname}/libra.db`, sqlite3.OPEN_READONLY, (err) => {
+  db = new sqlite3.Database(path.join(__dirname, '/libra.db'), sqlite3.OPEN_READONLY, (err) => {
     if (err) {
       throw new Error(err)
     }
@@ -120,7 +82,7 @@ function init (configFile) {
     console.log('db.ontrace:', sql)
   })
   templates = {}
-  let templateFiles = {
+  const templateFiles = {
     row: 'row.html',
     history: 'history.html',
     contact: 'contact.html',
@@ -131,8 +93,8 @@ function init (configFile) {
     search: 'search.html',
     bookRow: 'book-row.html',
     robots: 'robots.txt',
-    '500': '500.html',
-    '404': '404.html'
+    500: '500.html',
+    404: '404.html'
   }
   if (config.vulnerabilities.expose.indexOf('admin') >= 0) {
     templateFiles.admin = 'admin.html'
@@ -143,8 +105,8 @@ function init (configFile) {
   if (config.vulnerabilities.xss.indexOf('reflect') >= 0) {
     templateFiles.history = 'history-xss.html'
   }
-  for (let n in templateFiles) {
-    templates[n] = fs.readFileSync(`${__dirname}/tmpl/${templateFiles[n]}`, 'utf-8')
+  for (const n in templateFiles) {
+    templates[n] = fs.readFileSync(path.join(__dirname, '/tmpl/', templateFiles[n]), 'utf-8')
   }
   if (config.vulnerabilities.csrf) {
     templates.csrf = ''
@@ -152,24 +114,24 @@ function init (configFile) {
     templates.csrf = '<input type="hidden" name="token" value="<@ csrf_token @>">'
   }
 
-  let notice = fs.readFileSync(`${__dirname}/tmpl/notice.html`, 'utf-8')
-  for (let n in templates) {
+  const notice = fs.readFileSync(path.join(__dirname, '/tmpl/notice.html'), 'utf-8')
+  for (const n in templates) {
     templates[n] = templates[n].replace(/<@ notice @>/g, notice)
   }
-  if (!fs.existsSync(`${__dirname}/log`)) {
-    fs.mkdirSync(`${__dirname}/log`)
+  if (!fs.existsSync(path.join(__dirname, '/log'))) {
+    fs.mkdirSync(path.join(__dirname, '/log'))
   }
-  if (!fs.lstatSync(`${__dirname}/log`).isDirectory()) {
-    throw new Error(`${__dirname}/log is not a directory`)
+  if (!fs.lstatSync(path.join(__dirname, '/log')).isDirectory()) {
+    throw new Error(`${path.join(__dirname, '/log')} is not a directory`)
   }
 }
 
-let handlers = [
+const handlers = [
   {
     pattern: '/',
     method: 'GET',
     callback: (conn) => {
-      let user = conn.session.get('user')
+      const user = conn.session.get('user')
       if (!user) {
         conn.res.redirect('./login')
       } else {
@@ -181,7 +143,7 @@ let handlers = [
     pattern: '/login',
     method: 'GET',
     callback: (conn) => {
-      let html = waf.render(templates.login, {})
+      const html = waf.render(templates.login, {})
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       conn.res.end(html)
     }
@@ -196,17 +158,17 @@ let handlers = [
       if (pass === undefined) pass = ''
       if (mail === '' || pass === '') {
         conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-        let html = waf.render(templates.login, {errormsg: 'display:block', mail: mail, pass: pass})
+        const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass })
         conn.res.end(html)
         return
       }
-      let cb = (err, row) => {
+      const cb = (err, row) => {
         if (err) {
           console.error(err)
           conn.res.respondError(500)
         } else if (row === undefined) {
           conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-          let html = waf.render(templates.login, {errormsg: 'display:block', mail: mail, pass: pass})
+          const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass })
           conn.res.end(html)
         } else {
           if (config.vulnerabilities.session.indexOf('no-refresh') < 0) {
@@ -219,12 +181,12 @@ let handlers = [
       }
       if (config.vulnerabilities.sqli.indexOf('auth') >= 0) {
         // sqli here
-        let sql = `SELECT * FROM users WHERE (mail='${mail.replace(/'/g, '\'\'')}') and (pass='${pass}');`
+        const sql = `SELECT * FROM users WHERE (mail='${mail.replace(/'/g, '\'\'')}') and (pass='${pass}');`
         db.get(sql, cb)
       } else {
         // no sqli
-        let sql = 'SELECT * FROM users WHERE (mail=?) and (pass=?);'
-        let stmt = db.prepare(sql)
+        const sql = 'SELECT * FROM users WHERE (mail=?) and (pass=?);'
+        const stmt = db.prepare(sql)
         stmt.get(mail, pass, cb)
       }
     }
@@ -233,20 +195,22 @@ let handlers = [
     pattern: '/history',
     method: 'GET',
     callback: (conn) => {
-      let user = conn.session.get('user')
-      let uid = conn.session.get('id')
-      let htmlParams = {}
-      let params = qs.parse(conn.location.search.substring(1))
-      let q = params.q || ''
+      const user = conn.session.get('user')
+      const uid = conn.session.get('id')
+      const htmlParams = {}
+      const params = {
+        q: conn.location.searchParams.get('q'),
+        d: conn.location.searchParams.get('d')
+      }
+      const q = params.q || ''
       let sql
 
       if (user === undefined) {
         return conn.res.redirect('./')
       }
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      let cb = (err, rows) => {
+      const cb = (err, rows) => {
         let s = ''
-        let html
         try {
           if (err) {
             s = sql + '<br>' + err
@@ -261,15 +225,15 @@ let handlers = [
           s = e
         }
         htmlParams.table = s
-        htmlParams[ 'selected' + params.d ] = 'selected'
+        htmlParams['selected' + params.d] = 'selected'
         htmlParams.q = q
         htmlParams.user = user
         if (params.d) {
           htmlParams.range = `${(params.d || '').substr(0, 4)}年${(params.d || '').substr(4)}月`
         } else {
-          htmlParams.range = `全て`
+          htmlParams.range = '全て'
         }
-        html = waf.render(templates.history, htmlParams)
+        const html = waf.render(templates.history, htmlParams)
         conn.res.end(html)
       }
 
@@ -291,7 +255,7 @@ let handlers = [
         }
         sql += ' ORDER BY date1;'
         console.log('sql=', sql)
-        let stmt = db.prepare(sql)
+        const stmt = db.prepare(sql)
         stmt.all(`%${q}%`, uid, date, cb)
       }
     }
@@ -300,15 +264,12 @@ let handlers = [
     pattern: '/contact',
     method: 'GET',
     callback: (conn) => {
-      let user = conn.session.get('user')
-      let htmlParams = {
-        user: user
-      }
-      let html
+      const user = conn.session.get('user')
+      const htmlParams = { user }
       if (user === undefined) return conn.res.redirect('./')
 
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      html = waf.render(templates.contact, htmlParams)
+      const html = waf.render(templates.contact, htmlParams)
       conn.res.end(html)
     }
   },
@@ -316,12 +277,12 @@ let handlers = [
     pattern: '/contact',
     method: 'POST',
     callback: (conn) => {
-      let d = new Date()
-      let user = conn.session.get('user')
-      let uid = conn.session.get('id')
+      const d = new Date()
+      const user = conn.session.get('user')
+      const uid = conn.session.get('id')
       let html
-      let htmlParams = {
-        user: user,
+      const htmlParams = {
+        user,
         time: toJSTDateString(d)
       }
       if (user === undefined) return conn.res.redirect('./')
@@ -329,11 +290,11 @@ let handlers = [
       if (conn.body.send === '1') {
         html = waf.render(templates.contact2, htmlParams)
         {
-          let date =
+          const date =
             d.getFullYear().toString().padStart(4, '0') +
             (d.getMonth() + 1).toString().padStart(2, '0') +
             d.getDate().toString().padStart(2, '0')
-          let filename = `${__dirname}/log/${date}.txt`
+          const filename = path.join(__dirname, '/log', `/${date}.txt`)
           if (config.vulnerabilities.expose.indexOf('contact') >= 0) {
             fs.open(filename, 'a', (err, fd) => {
               if (err) {
@@ -374,11 +335,11 @@ let handlers = [
     pattern: '/search',
     method: 'GET',
     callback: (conn) => {
-      let sql, html
-      let q = conn.location.query.q
-      let user = conn.session.get('user')
-      let params = {
-        user: user,
+      let html
+      let q = conn.location.searchParams.get('q')
+      const user = conn.session.get('user')
+      const params = {
+        user,
         login: user ? 'inline' : 'none',
         logout: user ? 'none' : 'inline',
         q: q || '',
@@ -387,7 +348,7 @@ let handlers = [
       }
       if (q === undefined || q === '') q = '\0'
       else q = '%' + q + '%'
-      sql = `select * from books where title like ?;`
+      const sql = 'select * from books where title like ?;'
       db.all(sql, q, (err, rows) => {
         let s = ''
         if (err) {
@@ -421,32 +382,32 @@ let handlers = [
     pattern: '/book',
     method: 'GET',
     callback: (conn) => {
-      let sql, html
-      let bid = conn.location.query.id
-      let q = conn.location.query.q
-      let user = conn.session.get('user')
-      let params = {
-        user: user,
+      let html
+      const bid = conn.location.searchParams.get('id')
+      const q = conn.location.searchParams.get('q')
+      const user = conn.session.get('user')
+      const params = {
+        user,
         login: user ? 'inline' : 'none',
         logout: user ? 'none' : 'inline',
-        q: q,
+        q,
         past: ''
       }
       if (!bid) {
         return conn.res.respondError(404)
       }
-      let cb = (err, row) => {
+      const cb = (err, row) => {
         if (err) {
           console.error(err)
           return conn.res.respondError(500)
         } else if (row === undefined) {
           return conn.res.respondError(404)
         } else {
-          for (let prop in row) {
+          for (const prop in row) {
             params[prop] = row[prop]
           }
         }
-        let cb2 = (err, row) => {
+        const cb2 = (err, row) => {
           if (err) {
             console.error(err)
             return conn.res.respondError(500)
@@ -461,22 +422,22 @@ let handlers = [
             return conn.res.end(html)
           }
         }
-        let uid = conn.session.get('id')
+        const uid = conn.session.get('id')
         if (uid) {
           if (config.vulnerabilities.sqli.indexOf('blind') >= 0) {
-            let sql = `select count(*) from history where uid=${uid} and bid=${bid};`
+            const sql = `select count(*) from history where uid=${uid} and bid=${bid};`
             db.get(sql, cb2)
           } else {
-            let sql = 'select count(*) from history where uid=?;'
-            let stmt = db.prepare(sql)
+            const sql = 'select count(*) from history where uid=?;'
+            const stmt = db.prepare(sql)
             stmt.get(bid, cb2)
           }
         } else {
           cb2()
         }
       }
-      sql = 'select * from books where id=CAST(? AS INTEGER);'
-      let stmt = db.prepare(sql)
+      const sql = 'select * from books where id=CAST(? AS INTEGER);'
+      const stmt = db.prepare(sql)
       stmt.get(bid, cb)
     }
   },
@@ -484,7 +445,7 @@ let handlers = [
     pattern: ':404',
     method: '*',
     callback: (conn) => {
-      conn.res.writeHead(404, {'Content-Type': 'text/html; charset=utf-8'})
+      conn.res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' })
       conn.res.end(templates['404'])
     }
   },
@@ -492,7 +453,7 @@ let handlers = [
     pattern: ':500',
     method: '*',
     callback: (conn) => {
-      conn.res.writeHead(500, {'Content-Type': 'text/html; charset=utf-8'})
+      conn.res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' })
       conn.res.end(templates['500'])
     }
   },
@@ -501,7 +462,7 @@ let handlers = [
     method: 'get',
     callback: (conn) => {
       if (config.vulnerabilities.expose.indexOf('admin') >= 0) {
-        conn.res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+        conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
         conn.res.end(waf.render(templates.admin, {}))
       } else {
         return conn.res.respondError(404)
@@ -515,8 +476,8 @@ let handlers = [
       if (config.vulnerabilities.expose.indexOf('admin') < 0) {
         return conn.res.respondError(404)
       }
-      let conn_ = conn
-      conn.res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'})
+      const conn_ = conn
+      conn.res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' })
       setTimeout(() => {
         conn_.res.end('ng')
       }, 3000)
@@ -530,41 +491,40 @@ let handlers = [
         return conn.res.respondError(404)
       }
 
-      let template = '<response><result>ng</result><msg><@ msg @></msg><@ raw:book @></response>'
-      let t = (xmldoc, xpath) => {
-        let e = xmldoc.get(xpath)
+      const template = '<response><result>ng</result><msg><@ msg @></msg><@ raw:book @></response>'
+      const t = (xmldoc, xpath) => {
+        const e = xmldoc.get(xpath)
         return e !== undefined ? e.text() : e
       }
-      conn.res.writeHead(200, {'Content-Type': 'text/xml; charset=utf-8'})
+      conn.res.writeHead(200, { 'Content-Type': 'text/xml; charset=utf-8' })
 
       if (conn.body === undefined) {
-        return conn.res.end(waf.render(template, {msg: 'invalid parameter', book: ''}))
+        return conn.res.end(waf.render(template, { msg: 'invalid parameter', book: '' }))
       }
       let doc
-      let xml = conn.body
+      const xml = conn.body
       try {
-        doc = libxmljs.Document.fromXml(xml, {dtdvalid: false, noent: config.vulnerabilities.xxe})
+        doc = libxmljs.Document.fromXml(xml, { dtdvalid: false, noent: config.vulnerabilities.xxe })
       } catch (e) {
         console.error(e)
         console.error(xml)
-        return conn.res.end(waf.render(template, {msg: e.toString(), book: ''}))
+        return conn.res.end(waf.render(template, { msg: e.toString(), book: '' }))
       }
-      let title, pages, date, loc
-      title = t(doc, '//title')
-      pages = t(doc, '//pages')
-      date = t(doc, '//date')
-      loc = t(doc, '//loc')
+      const title = t(doc, '//title')
+      const pages = t(doc, '//pages')
+      const date = t(doc, '//date')
+      const loc = t(doc, '//loc')
       if (title === '' || !/^[\d]+$/.test(pages) || !/^[\d]{4}-[\d]{1,2}-[\d]{1,2}$/.test(date) || !/^[A-Z]{1,2}-[\d]{1,3}$/.test(loc)) {
-        return conn.res.end(waf.render(template, {msg: 'invalid parameter', book: ''}))
+        return conn.res.end(waf.render(template, { msg: 'invalid parameter', book: '' }))
       }
-      return conn.res.end(waf.render(template, {msg: 'internal error', book: doc.root().toString()}))
+      return conn.res.end(waf.render(template, { msg: 'internal error', book: doc.root().toString() }))
     }
   },
   {
     pattern: '/robots.txt',
     method: ['get', 'post'],
     callback: (conn) => {
-      conn.res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'})
+      conn.res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' })
       conn.res.end(templates.robots)
     }
   },
@@ -580,17 +540,17 @@ let handlers = [
     method: 'get',
     callback: (conn, match) => {
       if (config.vulnerabilities.expose.indexOf('dirindex') >= 0) {
-        let file = match[1]
+        const file = match[1]
         if (file) {
-          fs.readFile(`${__dirname}/log/${file}`, (err, data) => {
+          fs.readFile(path.join(__dirname, '/log/', file), (err, data) => {
             if (err) {
               return conn.res.respondError(err.code === 'ENOENT' ? 404 : 500)
             }
-            conn.res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'})
+            conn.res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' })
             conn.res.end(data)
           })
         } else {
-          conn.res.respondDirIndex(`${__dirname}/log`)
+          conn.res.respondDirIndex(path.join(__dirname, 'log'))
         }
       } else {
         return conn.res.respondError(404)
@@ -600,10 +560,10 @@ let handlers = [
 ]
 
 function main () {
-  let opt = {
+  const opt = {
     port: undefined,
     host: undefined,
-    config: `${__dirname}/config.json`
+    config: path.join(__dirname, '/config.json')
   }
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] === '-p' || process.argv[i] === '--port') {
@@ -617,7 +577,7 @@ function main () {
 
   init(opt.config)
   if (opt.port === undefined || opt.port === 0) opt.port = process.envPORT || 8080
-  let server = waf.createServer(wafConfig, handlers)
+  const server = waf.createServer(wafConfig, handlers)
   console.log('Starting httpd on port ' + opt.port)
   server.listen(opt.port, opt.host)
 }
