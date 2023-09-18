@@ -66,8 +66,16 @@ http.ServerResponse.prototype.redirect = function (status, targetUrl) {
     status = 302
   }
   targetUrl = targetUrl.replace(/[\r\n]/g, ' ')
-  this.writeHead(status, { Location: targetUrl })
-  this.end()
+  try {
+    if (!URL.canParse(targetUrl, config.origin || 'http://localhost')) {
+      targetUrl = '/'
+    }
+    this.writeHead(status, { Location: targetUrl })
+    this.end()
+  } catch (e) {
+    this.writeHead(status, { Location: '/' })
+    this.end()
+  }
 }
 
 http.ServerResponse.prototype.respondJson = function (json) {
