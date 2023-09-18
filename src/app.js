@@ -78,7 +78,7 @@ function init (configFile) {
   }
 
   sqlite3.verbose()
-  db = new sqlite3.Database(path.join(__dirname, '/libra.db'), sqlite3.OPEN_READONLY, (err) => {
+  db = new sqlite3.Database(path.resolve(__dirname, 'libra.db'), sqlite3.OPEN_READONLY, (err) => {
     if (err) {
       throw new Error(err)
     }
@@ -111,7 +111,7 @@ function init (configFile) {
     templateFiles.history = 'history-xss.html'
   }
   for (const n in templateFiles) {
-    templates[n] = fs.readFileSync(path.join(__dirname, '/tmpl/', templateFiles[n]), 'utf-8')
+    templates[n] = fs.readFileSync(path.resolve(__dirname, 'tmpl/', templateFiles[n]), 'utf-8')
   }
   if (config.vulnerabilities.csrf) {
     templates.csrf = ''
@@ -119,15 +119,15 @@ function init (configFile) {
     templates.csrf = '<input type="hidden" name="token" value="<@ csrf_token @>">'
   }
 
-  const notice = fs.readFileSync(path.join(__dirname, '/tmpl/notice.html'), 'utf-8')
+  const notice = fs.readFileSync(path.resolve(__dirname, 'tmpl/notice.html'), 'utf-8')
   for (const n in templates) {
     templates[n] = templates[n].replace(/<@ notice @>/g, notice)
   }
-  if (!fs.existsSync(path.join(__dirname, '/log'))) {
-    fs.mkdirSync(path.join(__dirname, '/log'))
+  if (!fs.existsSync(path.resolve(__dirname, 'log'))) {
+    fs.mkdirSync(path.resolve(__dirname, 'log'))
   }
-  if (!fs.lstatSync(path.join(__dirname, '/log')).isDirectory()) {
-    throw new Error(`${path.join(__dirname, '/log')} is not a directory`)
+  if (!fs.lstatSync(path.resolve(__dirname, 'log')).isDirectory()) {
+    throw new Error(`${path.resolve(__dirname, 'log')} is not a directory`)
   }
 }
 
@@ -304,7 +304,7 @@ const handlers = [
             d.getFullYear().toString().padStart(4, '0') +
             (d.getMonth() + 1).toString().padStart(2, '0') +
             d.getDate().toString().padStart(2, '0')
-          const filename = path.join(__dirname, '/log', `/${date}.txt`)
+          const filename = path.resolve(__dirname, 'log', `/${date}.txt`)
           if (config.vulnerabilities.expose.indexOf('contact') >= 0) {
             fs.open(filename, 'a', (err, fd) => {
               if (err) {
@@ -566,7 +566,7 @@ const handlers = [
       if (config.vulnerabilities.expose.indexOf('dirindex') >= 0) {
         const file = match[1]
         if (file) {
-          fs.readFile(path.join(__dirname, '/log/', file), (err, data) => {
+          fs.readFile(path.resolve(__dirname, 'log/', file), (err, data) => {
             if (err) {
               return conn.res.respondError(err.code === 'ENOENT' ? 404 : 500)
             }
@@ -574,7 +574,7 @@ const handlers = [
             conn.res.end(data)
           })
         } else {
-          conn.res.respondDirIndex(path.join(__dirname, 'log'))
+          conn.res.respondDirIndex(path.resolve(__dirname, 'log'))
         }
       } else {
         return conn.res.respondError(404)
@@ -587,7 +587,7 @@ function main () {
   const opt = {
     port: undefined,
     host: undefined,
-    config: path.join(__dirname, '/config.json')
+    config: path.resolve(__dirname, 'config.json')
   }
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] === '-p' || process.argv[i] === '--port') {
