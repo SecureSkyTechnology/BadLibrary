@@ -16,8 +16,8 @@ const contactBuffer = {
 function toJSTDateString (d) {
   if (d === undefined) d = new Date()
   d = new Date(d.getTime() + 9 * 60 * 60 * 1000)
-  const s4 = function (n) { return /([\d]{4})$/.exec('000' + n)[1] }
-  const s2 = function (n) { return /([\d]{2})$/.exec('0' + n)[1] }
+  const s4 = (n) => n.toString().padStart(4, '0')
+  const s2 = (n) => n.toString().padStart(2, '0')
   return `${s4(d.getUTCFullYear())}/${s2(1 + d.getUTCMonth())}/${s2(d.getUTCDate())} ${s2(d.getUTCHours())}:${s2(d.getUTCMinutes())}:${s2(d.getUTCSeconds())}`
 }
 
@@ -31,7 +31,7 @@ const counter = (function (initial) {
 function init (configFile) {
   config = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
   if (typeof config.vulnerabilities !== 'object') {
-    config.vulnerabilities = {}
+    config.vulnerabilities = Object.create(null)
   }
   (def => {
     Object.keys(def).forEach(v => {
@@ -60,7 +60,7 @@ function init (configFile) {
     xcto: true,
     staticFiles: ['/static/'],
     protectCsrf: true,
-    defaultHeaders: {}
+    defaultHeaders: Object.create(null)
   }
 
   if (config.vulnerabilities.session.indexOf('serial') >= 0) {
@@ -86,7 +86,7 @@ function init (configFile) {
   db.on('trace', (sql) => {
     console.log('db.ontrace:', sql)
   })
-  templates = {}
+  templates = Object.create(null)
   const templateFiles = {
     row: 'row.html',
     history: 'history.html',
@@ -98,6 +98,7 @@ function init (configFile) {
     search: 'search.html',
     bookRow: 'book-row.html',
     robots: 'robots.txt',
+    profile: 'profile.html',
     500: '500.html',
     404: '404.html'
   }
@@ -148,7 +149,12 @@ const handlers = [
     pattern: '/login',
     method: 'GET',
     callback: (conn) => {
-      const html = waf.render(templates.login, {})
+      const user = conn.session.get('user')
+      const params = {
+        login: user ? 'inline' : 'none',
+        logout: user ? 'none' : 'inline'
+      }
+      const html = waf.render(templates.login, params)
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       conn.res.end(html)
     }
@@ -485,9 +491,14 @@ const handlers = [
     pattern: '/admin',
     method: 'get',
     callback: (conn) => {
+      const user = conn.session.get('user')
+      const params = {
+        login: user ? 'inline' : 'none',
+        logout: user ? 'none' : 'inline'
+      }
       if (config.vulnerabilities.expose.indexOf('admin') >= 0) {
         conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-        conn.res.end(waf.render(templates.admin, {}))
+        conn.res.end(waf.render(templates.admin, params))
       } else {
         return conn.res.respondError(404)
       }
@@ -579,6 +590,31 @@ const handlers = [
       } else {
         return conn.res.respondError(404)
       }
+    }
+  },
+  {
+    pattern: '/profile',
+    method: 'GET',
+    callback: (conn) => {
+      const id = conn.session.get('id')
+      const user = conn.session.get('user')
+      if (id === undefined) return conn.res.redirect('./')
+      const htmlParams = { id, user }
+      const sql = 'SELECT zip, address, phone FROM users WHERE id = ?'
+      db.get(sql, [id], (err, row) => {
+        console.log(row)
+        if (err) {
+          console.error(err)
+          conn.res.respondError(500)
+        } else {
+          conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+          htmlParams.zip = row.zip
+          htmlParams.address = row.address
+          htmlParams.phone = row.phone
+          const html = waf.render(templates.profile, htmlParams)
+          conn.res.end(html)
+        }
+      })
     }
   }
 ]

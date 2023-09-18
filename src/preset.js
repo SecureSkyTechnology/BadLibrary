@@ -4,7 +4,7 @@ const path = require('path')
 const sqlite3 = require('sqlite3')
 
 const fs = require('fs')
-const dbfile = path.join(__dirname, '/libra.db')
+const dbfile = path.resolve(__dirname, 'libra.db')
 
 // eslint-disable-next-line no-unused-vars
 function row (title, user) {
@@ -24,15 +24,15 @@ function row (title, user) {
 }
 
 const users = [
-  [21, '秋田一郎', 'akita@example.jp', '1234'],
-  [22, '福井ゆき', 'fukui@example.jp', '2393'],
-  [23, '三重隆之', 'mie@example.jp', '4123'],
-  [24, '長野弘子', 'nagano@example.jp', '5124'],
-  [25, '千葉博信', 'chiba@example.jp', '8113'],
-  [26, '山口未希', 'yamaguchi@example.jp', '7432'],
-  [27, '香川真理', 'kagawa@example.jp', '2321'],
-  [28, '宮崎のどか', 'miyazaki@example.jp', '9090'],
-  [29, '石川淳史', 'ishikawa@example.jp', '5263']
+  [21, '秋田一郎', 'akita@example.jp', '1234', '1X2-1015', 'XX県XX市A町1-3-5', '0X0-XXXX-2523'],
+  [22, '福井ゆき', 'fukui@example.jp', '2393', '1X2-1023', 'XX県XX市B町2-5-2-101', '0X0-XXXX-9124'],
+  [23, '三重隆之', 'mie@example.jp', '4123', '1X1-0010', 'XX県YY市YY町3-1-1-1014', '0X0-XXXX-7132'],
+  [24, '長野弘子', 'nagano@example.jp', '5124', '2X1-0003', 'AA県AA市BB区AA通り4-3-103', '0X0-XXXX-3890'],
+  [25, '千葉博信', 'chiba@example.jp', '8113', '2X2-0012', 'AA県AA市AA区AAAA町2-2', '0X0-XXXX-5122'],
+  [26, '山口未希', 'yamaguchi@example.jp', '7432', '1X1-0002', 'XX県XX市C町3-1-15-802', '0X0-XXXX-4330'],
+  [27, '香川真理', 'kagawa@example.jp', '2321', '2X1-0003', 'AA県AA市BB区AA通り1-2-4', '0X0-XXXX-8010'],
+  [28, '宮崎のどか', 'miyazaki@example.jp', '9090', '1X3-0010', 'XX県ZZ市ZZ町3-3-1-201', '0X0-XXXX-9122'],
+  [29, '石川淳史', 'ishikawa@example.jp', '5263', '1X1-0010', 'XX県YY市YY町4-4-12-203', '0X0-XXXX-3121']
 ]
 
 const books = [
@@ -92,8 +92,8 @@ function init () {
     if (err) {
       throw new Error(err)
     }
-    db.run('create table users (id integer priomary key, name text, mail text, pass text);', () => {
-      const sql = 'INSERT INTO users VALUES(?, ?, ?, ?);'
+    db.run('create table users (id integer priomary key, name text, mail text, pass text, zip text, address text, phone text);', () => {
+      const sql = 'INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?);'
       let i
       for (i = 0; i < users.length; i++) {
         db.run(sql, users[i], () => {})

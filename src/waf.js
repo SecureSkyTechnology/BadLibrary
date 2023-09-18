@@ -200,31 +200,43 @@ function SessionManager () {
     SessionObj.prototype.renew = function () {
       const old = _sid
       _sid = config.sessionIdGenerator()
-      _sessions[_sid] = _sessions[old]
-      delete _sessions[old]
-      if (this.res !== undefined /* && !this.res.headersSent */) {
-        this.res.setHeader('Set-Cookie', `session=${this.sessionId()}; path=/; ${config.httponly ? 'httponly' : ''}; ${config.samesite ? 'samesite=' + config.samesite : ''}`)
+      if (Object.hasOwn(_sessions, _sid) || _sessions[_sid] === undefined) {
+        _sessions[_sid] = _sessions[old]
+        if (Object.hasOwn(_sessions, old)) {
+          delete _sessions[old]
+        }
+        if (this.res !== undefined /* && !this.res.headersSent */) {
+          this.res.setHeader('Set-Cookie', `session=${this.sessionId()}; path=/; ${config.httponly ? 'httponly' : ''}; ${config.samesite ? 'samesite=' + config.samesite : ''}`)
+        }
       }
     }
     SessionObj.prototype.sessionId = function () {
       return _sid
     }
     SessionObj.prototype.get = function (name) {
-      return _store[name]
+      if (Object.hasOwn(_store, name)) {
+        return _store[name]
+      }
     }
     SessionObj.prototype.set = function (name, value) {
-      _store[name] = value
-      return value
+      if (Object.hasOwn(_store, name) || _store[name] === undefined) {
+        _store[name] = value
+        return value
+      }
     }
     SessionObj.prototype.remove = function (name) {
-      const value = _store[name]
-      delete _store[name]
-      return value
+      if (Object.hasOwn(_store, name)) {
+        const value = _store[name]
+        delete _store[name]
+        return value
+      }
     }
     SessionObj.prototype.expire = function () {
-      delete _sessions[_sid]
+      if (Object.hasOwn(_sessions, _sid)) {
+        delete _sessions[_sid]
+      }
       if (this.res !== undefined) {
-        this.res.setHeader('Set-Cookie', 'session=0; econn.location.searchParams.userxpires=Sat, 01 Jan 2000 00:00:00 GMT; path=/')
+        this.res.setHeader('Set-Cookie', 'session=0; expires=Sat, 01 Jan 2000 00:00:00 GMT; path=/')
       }
     }
     /*
@@ -245,7 +257,7 @@ function SessionManager () {
 
   return function (sessionId, res) {
     let sessionObj
-    if (Object.prototype.hasOwnProperty.call(_sessions, sessionId)) {
+    if (Object.hasOwn(_sessions, sessionId)) {
       sessionObj = _sessions[sessionId]
       if (sessionObj) sessionObj._expire = (new Date()).getTime() + 30 * 60 * 1000 // 30min
     } else {
