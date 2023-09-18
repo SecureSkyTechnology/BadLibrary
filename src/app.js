@@ -157,8 +157,8 @@ const handlers = [
     pattern: '/login',
     method: 'POST',
     callback: (conn) => {
-      let mail = conn.body.mail
-      let pass = conn.body.pass
+      let mail = conn.body.get('mail')
+      let pass = conn.body.get('pass')
       if (mail === undefined) mail = ''
       if (pass === undefined) pass = ''
       if (mail === '' || pass === '') {
@@ -287,7 +287,7 @@ const handlers = [
       const uid = conn.session.get('id')
       let html
       if (user === undefined) return conn.res.redirect('./')
-      if (conn.body.send === '1') {
+      if (conn.body.get('send') === '1') {
         const htmlParams = { user }
         if (config.vulnerabilities.racecondition) {
           htmlParams.username = contactBuffer.username
@@ -295,8 +295,8 @@ const handlers = [
           htmlParams.text = contactBuffer.text
         } else {
           htmlParams.username = user
-          htmlParams.time = conn.body.time || ''
-          htmlParams.text = conn.body.text || ''
+          htmlParams.time = conn.body.get('time') || ''
+          htmlParams.text = conn.body.get('text') || ''
         }
         html = waf.render(templates.contact2, htmlParams)
         {
@@ -332,12 +332,12 @@ const handlers = [
           user,
           username: user,
           time: toJSTDateString(d),
-          text: conn.body.text
+          text: conn.body.get('text')
         }
         if (config.vulnerabilities.racecondition) {
           contactBuffer.username = user
           contactBuffer.time = toJSTDateString(d)
-          contactBuffer.text = conn.body.text
+          contactBuffer.text = conn.body.get('text')
         } else {
           const hiddenHtml = '<input type="hidden" name="text" value="<@ text @>"><input type="hidden" name="time" value="<@ time @>">'
           htmlParams.hidden = waf.render(hiddenHtml, htmlParams)
@@ -522,11 +522,11 @@ const handlers = [
       }
       conn.res.writeHead(200, { 'Content-Type': 'text/xml; charset=utf-8' })
 
-      if (conn.body === undefined) {
+      if (conn.body === undefined || conn.body.get('xml') === undefined) {
         return conn.res.end(waf.render(template, { msg: 'invalid parameter', book: '' }))
       }
       let doc
-      const xml = conn.body
+      const xml = conn.body.get('xml')
       try {
         doc = libxmljs.Document.fromXml(xml, { dtdvalid: false, noent: config.vulnerabilities.xxe })
       } catch (e) {

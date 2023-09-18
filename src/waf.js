@@ -17,8 +17,7 @@ const config = {
 const http = require('http')
 const fs = require('fs')
 const crypto = require('crypto')
-const qs = require('querystring')
-const url = require('url')
+const URL = require('url').URL
 const path = require('path')
 
 function defaultIdGenerator () {
@@ -365,7 +364,7 @@ const defaultHandler = [
  * @typedef wafConnection
  * @property {http.ClientRequest} req
  * @property {http.ServerResponse} res
- * @property {url.URL} location
+ * @property {URL} location
  */
 
 /**
@@ -530,10 +529,10 @@ exports.createServer = function (_config, _handlers) {
       res.setHeader('X-Content-Type-Options', 'nosniff')
     }
     try {
-      location = new url.URL(req.url, config.origin || 'http://localhost')
+      location = new URL(req.url, config.origin || 'http://localhost')
     } catch (e) {
       console.error((new Date()).toLocaleString(), e.stack)
-      location = new url.URL(config.origin || 'http://localhost')
+      location = new URL(config.origin || 'http://localhost')
       return errorHandler(500, { req, res, location, session })
     }
     if (typeof config.defaultHeaders === 'object') {
@@ -572,7 +571,7 @@ exports.createServer = function (_config, _handlers) {
       req.on('end', function (data) {
         let params = Object.create(null)
         try {
-          params = qs.parse(body)
+          params = new URLSearchParams(body)
         } catch (e) {
           console.error(e.stack)
         }
