@@ -9,6 +9,31 @@
     "install": "node preset.js",
     "lint": "eslint *.js"
   },
+  "eslintConfig": {
+    "extends": [
+      "standard",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "env": {
+      "es2022": true,
+      "node": true
+    },
+    "overrides": [
+      {
+        "files": [
+          "static/*.js"
+        ],
+        "env": {
+          "es2020": true,
+          "browser": true
+        }
+      }
+    ],
+    "plugins": []
+  },
   "author": "Yosuke HASEGAWA",
   "license": "MIT",
   "dependencies": {
@@ -16,8 +41,8 @@
     "sqlite3": "^5.0.8"
   },
   "devDependencies": {
-    "eslint": "^8.15.0",
-    "eslint-config-standard": "^17.0.0",
+    "eslint": "^8.49.0",
+    "eslint-config-standard": "^17.1.0",
     "eslint-plugin-node": "^11.1.0"
   }
 }
