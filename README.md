@@ -67,7 +67,7 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 - `vulnerabilities.expose` の要素に `"contact"` を指定すると、お問い合わせの内容のログが閲覧可能になります。(このオプションが指定されない場合はお問い合わせ内容は一切記録されません。)
 - `vulnerabilities.expose` の要素に `"dirindex"` を指定すると、お問い合わせログのディレクトリインデックスが有効になります。`vulnerabilities.expose = ["contact"]` も同時に指定する必要があります。
 - `vulnerabilities.expose` の要素に `"admin"` を指定すると、誰でもログイン無しに管理画面にアクセス可能になります。
-- `vulnerabilities.xxe` に `true` を指定すると、管理画面での書籍登録でXXEが有効になります。`vulnerabilities.expose = ["admin"]` も同時に指定する必要があります。
+- `vulnerabilities.xxe` に `true` を指定すると、管理画面での書籍登録でXXEが有効になります。`vulnerabilities.expose = ["admin"]` も同時に指定する必要があります。(libxml.jsのバージョンによっては期待通りの挙動とならない可能があります)
 - `vulnerabilities.csrf` に `true` を指定すると、お問い合わせ画面等でCSRFが有効になります。
 - `vulnerabilities.racecondition` に `true` を指定すると、お問い合わせ画面でレースコンディションが有効になります。
 
