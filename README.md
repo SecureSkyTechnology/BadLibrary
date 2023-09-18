@@ -7,7 +7,7 @@ node.jsだけ入っていれば特にそれ以外には何も必要なく動く�
 
 ## インストール
 
-	% https://github.com/SecureSkyTechnology/BadLibrary
+	% git clone https://github.com/SecureSkyTechnology/BadLibrary
     % cd BadLibrary/src
 	% npm install
 

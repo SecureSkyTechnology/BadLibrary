@@ -600,7 +600,7 @@ function main () {
   }
 
   init(opt.config)
-  if (opt.port === undefined || opt.port === 0) opt.port = process.envPORT || 8080
+  if (opt.port === undefined || opt.port === 0) opt.port = process.env.PORT || 8080
   const server = waf.createServer(wafConfig, handlers)
   console.log('Starting httpd on port ' + opt.port)
   server.listen(opt.port, opt.host)
