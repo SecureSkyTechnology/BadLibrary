@@ -265,7 +265,6 @@ const handlers = [
           date = `%${params.d.substr(0, 4)}-${params.d.substr(4, 2)}%`
         }
         sql += ' ORDER BY date1;'
-        console.log('sql=', sql)
         const stmt = db.prepare(sql)
         stmt.all(`%${q}%`, uid, date, cb)
       }
@@ -602,7 +601,6 @@ const handlers = [
       const htmlParams = { id, user }
       const sql = 'SELECT zip, address, phone FROM users WHERE id = ?'
       db.get(sql, [id], (err, row) => {
-        console.log(row)
         if (err) {
           console.error(err)
           conn.res.respondError(500)
