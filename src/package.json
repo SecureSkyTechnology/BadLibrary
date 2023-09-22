@@ -37,8 +37,8 @@
   "author": "Yosuke HASEGAWA",
   "license": "MIT",
   "dependencies": {
-    "libxmljs": "^0.19.10",
-    "sqlite3": "^5.0.8"
+    "libxmljs": "^1.0.9",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "eslint": "^8.49.0",
