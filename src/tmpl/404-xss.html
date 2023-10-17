@@ -5,7 +5,16 @@
 <title>404 Not Found</title>
 <script>
 document.addEventListener("DOMContentLoaded", function(){
-	document.getElementById("url").innerHTML = '<a href="' + location.href + '">' + location.href + '</a>';
+  const origin = location.origin
+  let url = location.href
+  if (url.startsWith(origin)) {
+    url = url.substr(origin.length)
+  }
+  try {
+    url = decodeURIComponent(url)
+  } catch (e) {
+  }
+  document.getElementById("url").innerHTML = `<a href="${location.href}">${url}</a>`
 }, false);
 </script>
 </head>
