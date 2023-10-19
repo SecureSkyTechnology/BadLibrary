@@ -47,12 +47,13 @@ span.header-item{
 	<label for="text">お問い合わせ内容:</label><br>
 	<textarea name="text" id="text" style="width:50em;height:5em" autofocus></textarea>
 	<br>
+	<@ csrf @>
 	<input type="submit" value=" 送信 ">
 	</form>
 </div>
 <div style="display:none">
 <form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
-	<@ raw:csrf @>
+	<@ csrf @>
 </form>
 </div>
 <@ notice @>

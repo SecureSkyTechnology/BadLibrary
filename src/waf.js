@@ -323,7 +323,7 @@ function render (template, param, conn) {
   if (typeof param !== 'object') param = Object.create(null)
   const s = template.replace(/<@\s*(raw:)?\s*([\w]+)\s*@>/g, (str, p1, p2) => {
     if (config.protectCsrf && p2 === 'csrf_token' && param[p2] === undefined) {
-      return htmlEscape(conn.session.get('csrf_token'))
+      return htmlEscape(conn && conn.session ? conn.session.get('csrf_token') : '')
     } else {
       const r = param[p2] === undefined ? '' : param[p2]
       if (p1) {
@@ -401,19 +401,20 @@ exports.createServer = function (_config, _handlers) {
 
   if (_handlers === undefined) _handlers = []
   _handlers.forEach((handler) => {
-    const f = (_pattern, _method, _callback) => {
+    const f = (_pattern, _method, _callback, _protectCsrf) => {
       handlers.push({
         pattern: _pattern,
         method: typeof _method === 'string' ? [_method.toLowerCase()] : _method.map(s => s.toLowerCase()),
-        callback: _callback
+        callback: _callback,
+        protectCsrf: _protectCsrf
       })
     }
     if (handler.pattern instanceof Array) {
       handler.pattern.forEach(pattern => {
-        f(pattern, handler.method, handler.callback)
+        f(pattern, handler.method, handler.callback, handler.protectCsrf)
       })
     } else {
-      f(handler.pattern, handler.method, handler.callback)
+      f(handler.pattern, handler.method, handler.callback, handler.protectCsrf)
     }
   })
 
@@ -512,6 +513,12 @@ exports.createServer = function (_config, _handlers) {
           }
           if (callback) {
             if (patternMatched && (h.method.indexOf('*') !== -1 || h.method.indexOf(method) !== -1)) {
+              if (req.method.toLowerCase() === 'post') {
+                const protectCsrf = h.protectCsrf === true || (h.protectCsrf !== false && config.protectCsrf)
+                if (protectCsrf && conn.body.get('token') !== session.get('csrf_token')) {
+                  return errorHandler(403, conn)
+                }
+              }
               if (m !== null) {
                 return callback(conn, m)
               } else {
@@ -596,9 +603,6 @@ exports.createServer = function (_config, _handlers) {
           console.error(e.stack)
         }
 
-        if (config.protectCsrf && params.token !== session.get('csrf_token')) {
-          return errorHandler(403, { req, res, location, session, body: params })
-        }
         return fireCallback({ req, res, location, session, body: params })
       })
     } else if (req.method === 'POST' && (req.headers['content-type'] || '').match(/^application\/json[ ;]?/i)) {
@@ -614,9 +618,11 @@ exports.createServer = function (_config, _handlers) {
           console.error(e.stack)
         }
 
+        /*
         if (config.protectCsrf && params.token !== session.get('csrf_token')) {
           return errorHandler(403, { req, res, location, session, body: params })
         }
+        */
         return fireCallback({ req, res, location, session, body: params })
       })
     } else if (req.method === 'POST' && (req.headers['content-type'] || '').match(/^text\/plain[ ;]?/i)) {
@@ -626,9 +632,11 @@ exports.createServer = function (_config, _handlers) {
         body += data
       })
       req.on('end', function (data) {
+        /*
         if (config.protectCsrf && token !== session.get('csrf_token')) {
           return errorHandler(403, { req, res, location, session, body })
         }
+        */
         return fireCallback({ req, res, location, session, body })
       })
     } else if (req.method === 'POST' && (req.headers['content-type'] || '').match(/^multipart\/form-data[ ;]?/i)) {

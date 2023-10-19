@@ -51,13 +51,14 @@ span.header-item{
 		<@ text @>
 	</div>
 	<@ raw:hidden @>
+	<@ csrf @>
 	<input type="hidden" name="send" value="1">
 	<input type="submit" value=" 送信 ">
 	</form>
 </div>
 <div style="display:none">
 <form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
-	<@ raw:csrf @>
+	<@ csrf @>
 </form>
 </div>
 <@ notice @>

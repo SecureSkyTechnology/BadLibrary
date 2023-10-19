@@ -57,9 +57,7 @@ span.header-item{
 			<input type="email" id="mail" name="mail" size="40" autofocus value="<@ mail @>"><br>
 			<label for="pass">暗証番号(4桁): </label><br>
 			<input type="password" id="pass" name="pass" size="40" maxlength="40" value="<@ pass @>"><br>
-			<!--
-			<input type="text" id="pass" name="pass" size="40" maxlength="40" value="<@ pass @>"><br>
-			-->
+			<@ csrf @>
 			<br>
 			<input type="submit" value=" ログイン ">
 		</form>

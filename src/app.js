@@ -114,15 +114,12 @@ function init (configFile) {
   for (const n in templateFiles) {
     templates[n] = fs.readFileSync(path.resolve(__dirname, 'tmpl/', templateFiles[n]), 'utf-8')
   }
-  if (config.vulnerabilities.csrf) {
-    templates.csrf = ''
-  } else {
-    templates.csrf = '<input type="hidden" name="token" value="<@ csrf_token @>">'
-  }
-
+  const csrf = config.vulnerabilities.csrf ? '' : '<input type="hidden" name="token" value="<@ csrf_token @>">'
   const notice = fs.readFileSync(path.resolve(__dirname, 'tmpl/notice.html'), 'utf-8')
   for (const n in templates) {
-    templates[n] = templates[n].replace(/<@ notice @>/g, notice)
+    templates[n] = templates[n].replace(/<@ (notice|csrf) @>/g, (p, s) => {
+      return s === 'notice' ? notice : csrf
+    })
   }
   if (!fs.existsSync(path.resolve(__dirname, 'log'))) {
     fs.mkdirSync(path.resolve(__dirname, 'log'))
@@ -152,7 +149,8 @@ const handlers = [
       const user = conn.session.get('user')
       const params = {
         login: user ? 'inline' : 'none',
-        logout: user ? 'none' : 'inline'
+        logout: user ? 'none' : 'inline',
+        csrf_token: conn.session.get('csrf_token')
       }
       const html = waf.render(templates.login, params)
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
@@ -165,11 +163,12 @@ const handlers = [
     callback: (conn) => {
       let mail = conn.body.get('mail')
       let pass = conn.body.get('pass')
+      const token = conn.session.get('csrf_token')
       if (mail === undefined) mail = ''
       if (pass === undefined) pass = ''
       if (mail === '' || pass === '') {
         conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-        const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass })
+        const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass, csrf_token: token })
         conn.res.end(html)
         return
       }
@@ -179,7 +178,7 @@ const handlers = [
           conn.res.respondError(500)
         } else if (row === undefined) {
           conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-          const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass })
+          const html = waf.render(templates.login, { errormsg: 'display:block', mail, pass, csrf_token: token })
           conn.res.end(html)
         } else {
           if (config.vulnerabilities.session.indexOf('no-refresh') < 0) {
@@ -208,7 +207,7 @@ const handlers = [
     callback: (conn) => {
       const user = conn.session.get('user')
       const uid = conn.session.get('id')
-      const htmlParams = {}
+      const htmlParams = Object.create(null)
       const params = {
         q: conn.location.searchParams.get('q'),
         d: conn.location.searchParams.get('d')
@@ -239,6 +238,7 @@ const handlers = [
         htmlParams['selected' + params.d] = 'selected'
         htmlParams.q = q
         htmlParams.user = user
+        htmlParams.csrf_token = conn.session.get('csrf_token')
         if (params.d) {
           htmlParams.range = `${(params.d || '').substr(0, 4)}年${(params.d || '').substr(4)}月`
         } else {
@@ -275,7 +275,9 @@ const handlers = [
     method: 'GET',
     callback: (conn) => {
       const user = conn.session.get('user')
-      const htmlParams = { user }
+      const htmlParams = Object.create(null)
+      htmlParams.user = user
+      htmlParams.csrf_token = conn.session.get('csrf_token')
       if (user === undefined) return conn.res.redirect('./')
 
       conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
@@ -293,7 +295,9 @@ const handlers = [
       let html
       if (user === undefined) return conn.res.redirect('./')
       if (conn.body.get('send') === '1') {
-        const htmlParams = { user }
+        const htmlParams = Object.create(null)
+        htmlParams.user = user
+        htmlParams.csrf_token = conn.session.get('csrf_token')
         if (config.vulnerabilities.racecondition) {
           htmlParams.username = contactBuffer.username
           htmlParams.time = contactBuffer.time
@@ -337,7 +341,8 @@ const handlers = [
           user,
           username: user,
           time: toJSTDateString(d),
-          text: conn.body.get('text')
+          text: conn.body.get('text'),
+          csrf_token: conn.session.get('csrf_token')
         }
         if (config.vulnerabilities.racecondition) {
           contactBuffer.username = user
@@ -373,7 +378,8 @@ const handlers = [
         logout: user ? 'none' : 'inline',
         q: q || '',
         display: 'display: none;',
-        notfound: 'display:none;'
+        notfound: 'display:none;',
+        csrf_token: conn.session.get('csrf_token')
       }
       if (q === undefined || q === '') q = '\0'
       else q = '%' + q + '%'
@@ -420,7 +426,8 @@ const handlers = [
         login: user ? 'inline' : 'none',
         logout: user ? 'none' : 'inline',
         q,
-        past: ''
+        past: '',
+        csrf_token: conn.session.get('csrf_token')
       }
       if (!bid) {
         return conn.res.respondError(404)
@@ -493,7 +500,8 @@ const handlers = [
       const user = conn.session.get('user')
       const params = {
         login: user ? 'inline' : 'none',
-        logout: user ? 'none' : 'inline'
+        logout: user ? 'none' : 'inline',
+        csrf_token: conn.session.get('csrf_token')
       }
       if (config.vulnerabilities.expose.indexOf('admin') >= 0) {
         conn.res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
@@ -532,11 +540,11 @@ const handlers = [
       }
       conn.res.writeHead(200, { 'Content-Type': 'text/xml; charset=utf-8' })
 
-      if (conn.body === undefined || conn.body.get('xml') === undefined) {
+      if (typeof conn.body !== 'string') {
         return conn.res.end(waf.render(template, { msg: 'invalid parameter', book: '' }))
       }
       let doc
-      const xml = conn.body.get('xml')
+      const xml = conn.body
       try {
         doc = libxmljs.Document.fromXml(xml, { dtdvalid: false, noent: config.vulnerabilities.xxe })
       } catch (e) {
@@ -598,7 +606,7 @@ const handlers = [
       const id = conn.session.get('id')
       const user = conn.session.get('user')
       if (id === undefined) return conn.res.redirect('./')
-      const htmlParams = { id, user }
+      const htmlParams = { id, user, csrf_token: conn.session.get('csrf_token') }
       const sql = 'SELECT zip, address, phone FROM users WHERE id = ?'
       db.get(sql, [id], (err, row) => {
         if (err) {

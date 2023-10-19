@@ -29,6 +29,7 @@ span.header-item{
 }
 
 </style>
+<script src="/static/lib.js"></script>
 </head>
 <body>
 <div style="background-color:silver;padding:0.5em 2em 0.5em 2em">
@@ -41,7 +42,7 @@ span.header-item{
 	<span class="header-item">[ <a href="./contact">お問合せ</a> ]</span>
 	<span class="header-item login">[ <a href="./profile">登録情報</a> ]</span>
 	<span class="header-item login">[ <a href="./logout">ログアウト</a> ]</span>
-	<span class="header-item logout">[ ログアウト ]</span>
+	<span class="header-item logout" id="logout">[ ログアウト ]</span>
 </div>
 <div style="padding: 1em 2em 1em 2em">
 	<div>
@@ -66,7 +67,7 @@ span.header-item{
 </div>
 <div style="display:none">
 <form method="POST" action="/logout" id="form-logout" enctype="application/x-www-form-urlencoded">
-	<@ raw:csrf @>
+	<@ csrf @>
 </form>
 </div>
 <@ notice @>
