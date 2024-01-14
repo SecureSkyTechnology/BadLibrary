@@ -236,7 +236,7 @@ let handlers = [
       let user = conn.session.get('user')
       let uid = conn.session.get('id')
       let htmlParams = {}
-      let params = qs.parse(conn.location.search.substring(1))
+      let params = qs.parse(conn.location.search?.substring(1))
       let q = params.q || ''
       let sql
 
